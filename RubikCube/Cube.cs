@@ -39,6 +39,8 @@ namespace RubikCube
 
         void MoveRow(Face face, int rowIndex, XMovement rotation)
         {
+            if (size % 2 == 1 && rowIndex == size / 2)
+                throw new ArgumentException("RowIndex cannot be central if cube is uneven sized");
             Func<Face, Face> next = rotation == XMovement.Left ? (Func<Face, Face>)Left : Right;
             if (rowIndex == 0)
             {
@@ -51,25 +53,28 @@ namespace RubikCube
                 else connections[face].Up.RotateClockwise();
             }
 
+            SwapRow(face,rowIndex,next(face));
+            SwapRow(next(next(face)),rowIndex, next(next(next((face)))));
+            SwapRow(face,rowIndex, next(next(face)));
+        }
+
+        void SwapRow(Face current,int rowIndex,Face next)
+        {
             Element[] temp = new Element[size];
-            void Swap(Face current)
+            for (int i = 0; i < size; i++)
             {
-                for (int i = 0; i < size; i++)
-                {
-                    temp[i] = current.elements[rowIndex, i];
-                    current.elements[rowIndex, i] = next(current).elements[rowIndex, i];
-                    next(current).elements[rowIndex, i] = temp[i];
-                }
+                temp[i] = current.elements[rowIndex, i];
+                current.elements[rowIndex, i] = next.elements[rowIndex, i];
+                next.elements[rowIndex, i] = temp[i];
             }
-            Swap(face);
-            Swap(next(next(face)));
-            Swap(face);
         }
 
         public void MoveColumn(int columnIndex, YMovement rotation) => MoveColumn(faces[0], columnIndex, rotation);
 
         void MoveColumn(Face face, int columnIndex, YMovement rotation)
         {
+            if (size % 2 == 1 && columnIndex == size / 2)
+                throw new ArgumentException("ColumnIndex cannot be central if cube is uneven sized");
             Func<Face, Face> next = rotation == YMovement.Up ? (Func<Face, Face>)Up : Down;
             if (columnIndex == 0)
             {
@@ -82,19 +87,23 @@ namespace RubikCube
                 else connections[face].Right.RotateClockwise();
             }
             Element[] temp = new Element[size];
-            void Swap(Face current)
-            {
-                for (int i = 0; i < size; i++)
-                {
-                    temp[i] = current.elements[i, columnIndex];
-                    current.elements[i, columnIndex] = next(current).elements[i, columnIndex];
-                    next(current).elements[i, columnIndex] = temp[i];
-                }
-            }
-            Swap(face);
-            Swap(next(next(face)));
-            Swap(face);
+
+            SwapColumn(face,columnIndex,next(face));
+            SwapColumn(next(next(face)),columnIndex,next(next(next(face))));
+            SwapColumn(face,columnIndex,next(next(face)));
         }
+
+        void SwapColumn(Face current,int columnIndex,Face next)
+        {
+            Element[] temp = new Element[size];
+            for (int i = 0; i < size; i++)
+            {
+                temp[i] = current.elements[i, columnIndex];
+                current.elements[i, columnIndex] = next.elements[i, columnIndex];
+                next.elements[i, columnIndex] = temp[i];
+            }
+        }
+
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder(6 * size * 6 + 6);
