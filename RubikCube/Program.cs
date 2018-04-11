@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+
 namespace RubikCube
 {
     class MainClass
     {
         public static void Main(string[] args)
         {
-            
+            Console.WriteLine(new Cube());   
         }
     }
 
     class Cube
     {
-        Face[] faces;
+        readonly Face[] faces;
         public readonly int size;
         public Dictionary<Face, (Face Up,Face Down,Face Right, Face Left)> connections = 
             new Dictionary<Face, (Face Up, Face Down, Face Right, Face Left)>();
@@ -42,7 +44,6 @@ namespace RubikCube
         Face Left(Face face) => connections[face].Left;
         Face Right(Face face) => connections[face].Right;
 
-
         void MoveRow(Face face,int rowIndex,XMovement rotation)
         {
             Func<Face, Face> next = rotation == XMovement.Left ? (Func<Face, Face>) Left  : Right;
@@ -58,7 +59,7 @@ namespace RubikCube
             }
 
             Element[] temp = new Element[size];
-            void Rotate(Face current)
+            void Swap(Face current)
 			{
                 for (int i = 0; i < size; i++)
                 {
@@ -67,9 +68,9 @@ namespace RubikCube
 				next(current).elements[rowIndex, i] = temp[i];
                 }
 			}
-            Rotate(face);
-            Rotate(next(next(face)));
-            Rotate(face);
+            Swap(face);
+            Swap(next(next(face)));
+            Swap(face);
         }
         void MoveColumn(Face face,int columnIndex, YMovement rotation)
         {
@@ -85,7 +86,7 @@ namespace RubikCube
                 else connections[face].Right.RotateClockwise();
             }
             Element[] temp = new Element[size];
-            void Rotate(Face current)
+            void Swap(Face current)
             {
                 for (int i = 0; i < size; i++)
                 {
@@ -94,10 +95,27 @@ namespace RubikCube
                     next(current).elements[i, columnIndex] = temp[i];
                 }
             }
-            Rotate(face);
-            Rotate(next(next(face)));
-            Rotate(face);
-
+            Swap(face);
+            Swap(next(next(face)));
+            Swap(face);
+        }
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder(6 * size * 6 + 6);
+            foreach(Face face in faces)
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    for (int j = 0; j < size; j++)
+                    { 
+                        builder.Append(face.elements[i, j].Color); 
+                        builder.Append(' ');
+                    }
+                    builder.AppendLine();
+                }
+                builder.AppendLine();
+            }
+            return builder.ToString();
         }
     }
     enum XMovement {Left, Right}
@@ -139,10 +157,10 @@ namespace RubikCube
     }
     struct Element
     {
-        Color color;
+        public Color Color;
         public Element(Color color)
         {
-            this.color = color;
+            Color = color;
         }
     }
     enum Color{ Red,White,Blue,Green,Orange,Yellow}
