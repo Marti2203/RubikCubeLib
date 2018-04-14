@@ -9,9 +9,13 @@ namespace RubikCube
     {
         public static void Main(string[] args)
         {
-            Cube test = new Cube(); 
-            test.MoveRow(0,XMovement.Left);
+            Cube test = new Cube();
             Console.WriteLine(test);
+            test.MoveColumn(0,YMovement.Up);
+            Console.WriteLine(test);
+            //test.MoveColumn(0,YMovement.Up)
+            //    .MoveRow(2,XMovement.Right);
+            //Console.WriteLine(test);
         }
     }
 }
